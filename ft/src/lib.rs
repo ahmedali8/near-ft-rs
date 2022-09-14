@@ -57,11 +57,7 @@ impl Contract {
     /// Initializes the contract with the given total supply owned by the given `owner_id` with
     /// the given fungible token metadata.
     #[init]
-    pub fn new(
-        owner_id: AccountId,
-        total_supply: U128,
-        metadata: FungibleTokenMetadata,
-    ) -> Self {
+    pub fn new(owner_id: AccountId, total_supply: U128, metadata: FungibleTokenMetadata) -> Self {
         assert!(!env::state_exists(), "Already initialized");
         metadata.assert_valid();
         let mut this = Self {
@@ -101,7 +97,6 @@ impl FungibleTokenMetadataProvider for Contract {
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use near_sdk::test_utils::{accounts, VMContextBuilder};
-    use near_sdk::MockedBlockchain;
     use near_sdk::{testing_env, Balance};
 
     use super::*;
@@ -109,7 +104,7 @@ mod tests {
     const TOTAL_SUPPLY: Balance = 1_000_000_000_000_000;
 
     fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
-        let mut builder = VMContextBuilder::new();
+        let mut builder: VMContextBuilder = VMContextBuilder::new();
         builder
             .current_account_id(accounts(0))
             .signer_account_id(predecessor_account_id.clone())
@@ -119,9 +114,10 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let mut context = get_context(accounts(1));
+        let mut context: VMContextBuilder = get_context(accounts(1));
         testing_env!(context.build());
-        let contract = Contract::new_default_meta(accounts(1).into(), TOTAL_SUPPLY.into());
+        let contract: Contract =
+            Contract::new_default_meta(accounts(1).into(), TOTAL_SUPPLY.into());
         testing_env!(context.is_view(true).build());
         assert_eq!(contract.ft_total_supply().0, TOTAL_SUPPLY);
         assert_eq!(contract.ft_balance_of(accounts(1)).0, TOTAL_SUPPLY);
@@ -130,16 +126,17 @@ mod tests {
     #[test]
     #[should_panic(expected = "The contract is not initialized")]
     fn test_default() {
-        let context = get_context(accounts(1));
+        let context: VMContextBuilder = get_context(accounts(1));
         testing_env!(context.build());
-        let _contract = Contract::default();
+        let _contract: Contract = Contract::default();
     }
 
     #[test]
     fn test_transfer() {
-        let mut context = get_context(accounts(2));
+        let mut context: VMContextBuilder = get_context(accounts(2));
         testing_env!(context.build());
-        let mut contract = Contract::new_default_meta(accounts(2).into(), TOTAL_SUPPLY.into());
+        let mut contract: Contract =
+            Contract::new_default_meta(accounts(2).into(), TOTAL_SUPPLY.into());
         testing_env!(context
             .storage_usage(env::storage_usage())
             .attached_deposit(contract.storage_balance_bounds().min.into())
@@ -153,7 +150,7 @@ mod tests {
             .attached_deposit(1)
             .predecessor_account_id(accounts(2))
             .build());
-        let transfer_amount = TOTAL_SUPPLY / 3;
+        let transfer_amount: u128 = TOTAL_SUPPLY / 3;
         contract.ft_transfer(accounts(1), transfer_amount.into(), None);
 
         testing_env!(context

@@ -1,0 +1,1 @@
+contract deployed: https://explorer.testnet.near.org/transactions/93N9nHgKychTE3xqpVEQW2VYk2EtjsRNX1WvnM2TFnpB
